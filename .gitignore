@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+.next/
+dist/
+*.tsbuildinfo
+
+# Prisma
+packages/db/prisma/migrations/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Test
+coverage/
+
+# Turbo
+.turbo/
+
+# Docker
+data/
+
+# Encryption key backups — NEVER commit these
+*.key
+*.pem
+
+# Claude Code local settings
+.claude/

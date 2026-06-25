@@ -1,0 +1,131 @@
+// IPOBaje — Prisma database schema
+// PostgreSQL 16, Prisma 5.x
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum IssueStatus {
+  OPEN
+  CLOSED
+  RESULT_PUBLISHED
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPLYING
+  APPLIED
+  ALLOTTED
+  NOT_ALLOTTED
+  FAILED
+  SKIPPED
+}
+
+enum NotificationType {
+  NEW_IPO_OPEN
+  AUTO_APPLY_SUCCESS
+  AUTO_APPLY_FAILED
+  RESULT_ALLOTTED
+  RESULT_NOT_ALLOTTED
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+model User {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  name           String?
+  hashedPassword String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  accounts       MeroShareAccount[]
+  notifications  Notification[]
+}
+
+model MeroShareAccount {
+  id                String          @id @default(cuid())
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  boid              String          // 16-digit demat account ID
+  username          String?         // Original MeroShare login username (may differ from BOID)
+  dpId              Int
+  dpName            String
+  fullName          String?
+  encryptedPassword String          // AES-256-GCM ciphertext (hex)
+  encryptionIv      String          // 12-byte IV (hex)
+  encryptionTag     String          // 16-byte GCM auth tag (hex)
+  bankId            Int?
+  bankName          String?
+  accountNumber     String?
+  accountBranchId   Int?
+  crnNumber         String?
+  customerId        Int?
+  isActive          Boolean         @default(true)
+  lastLoginAt       DateTime?
+  lastAppliedAt     DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  applications      IPOApplication[]
+
+  @@unique([userId, boid])
+}
+
+model IPOIssue {
+  id             String          @id @default(cuid())
+  companyShareId Int             @unique // CDSC's own primary key
+  scrip          String
+  companyName    String
+  shareType      String          // "IPO" | "FPO" | "RIGHT"
+  shareGroup     String          // "Ordinary" | "Promoter"
+  status         IssueStatus     @default(OPEN)
+  openDate       DateTime
+  closeDate      DateTime
+  issuePrice     Decimal?        @db.Decimal(10, 2)
+  minUnit        Int
+  maxUnit        Int
+  prospectusUrl  String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  applications   IPOApplication[]
+}
+
+model IPOApplication {
+  id              String            @id @default(cuid())
+  accountId       String
+  account         MeroShareAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  issueId         String
+  issue           IPOIssue          @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  appliedKitta    Int
+  appliedAt       DateTime?
+  status          ApplicationStatus @default(PENDING)
+  allottedKitta   Int?
+  resultCheckedAt DateTime?
+  errorMessage    String?
+  retryCount      Int               @default(0)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@unique([accountId, issueId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+}

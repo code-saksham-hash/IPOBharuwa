@@ -1,0 +1,23 @@
+{
+  "name": "ipobaje",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "format": "prettier --write .",
+    "db:migrate": "pnpm --filter @ipobaje/db db:migrate",
+    "db:seed": "pnpm --filter @ipobaje/db db:seed",
+    "worker:dev": "pnpm --filter @ipobaje/worker dev",
+    "worker:test-login": "pnpm --filter @ipobaje/meroshare-client test-login"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.4.0",
+    "@types/node": "^20.0.0",
+    "prettier": "^3.2.0",
+    "eslint": "^8.57.0"
+  }
+}
