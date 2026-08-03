@@ -1,5 +1,6 @@
 {
   "name": "ipopilot",
+  "description": "Automates applying for IPOs on MeroShare, Nepal's CDSC platform.",
   "private": true,
   "license": "MIT",
   "packageManager": "pnpm@9.0.0",
