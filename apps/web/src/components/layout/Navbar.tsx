@@ -13,7 +13,7 @@ export function Navbar() {
     <header className="flex h-12 items-center justify-between border-b border-[#1A1A1A] bg-[#000000] px-6">
       {/* Left: Logo */}
       <Link href="/dashboard" className="text-[15px] font-semibold text-white hover:text-white">
-        IPOBaje
+        IPOPilot
       </Link>
 
       {/* Center: User's MeroShare full name */}

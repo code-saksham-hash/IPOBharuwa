@@ -1,6 +1,6 @@
-# IPOBaje
+# IPOPilot
 
-IPOBaje is an open source web dashboard meant to automatically apply for IPOs on MeroShare, the online portal of Nepal's Central Depository System and Clearing Limited (CDSC). A user links one or more MeroShare accounts, and a background worker is supposed to notice when a new share issue opens, submit an application on the user's behalf, and later check whether shares were allotted.
+IPOPilot is an open source web dashboard meant to automatically apply for IPOs on MeroShare, the online portal of Nepal's Central Depository System and Clearing Limited (CDSC). A user links one or more MeroShare accounts, and a background worker is supposed to notice when a new share issue opens, submit an application on the user's behalf, and later check whether shares were allotted.
 
 > This project has no affiliation with CDSC, MeroShare, NEPSE, or any Nepali government body. It is an independent, unofficial client built by reverse engineering the public MeroShare web app.
 
@@ -150,19 +150,9 @@ Treat this as a personal, local project to run against a test or low value accou
 5. `ENCRYPTION_KEY` must be exactly 64 hex characters; the worker validates this at startup and exits if it is not.
 6. Because MeroShare's API is unofficial and undocumented, it can change or break at any time without notice, and has no changelog or support channel to watch for that.
 
-## Suggested project name
+## Naming history
 
-The project currently has two names in play at once: the GitHub repository is named IPOBharuwa, while the product itself, in `package.json`, in `PROJECT.md`, and in the dashboard's own UI text, calls itself IPOBaje. Neither is wrong on its own. Baje is a colloquial Nepali word for an elder or "the old man who takes care of things"; Bharuwa means a porter, someone who carries a load for you. Both fit a tool whose whole point is carrying a tedious task on your behalf. But having both names active at once, pointing at the same project, is confusing for anyone landing on the repository, and worth resolving regardless of anything else in this document.
-
-If picking a single name going forward, a few options, none of them requiring the reader to already know the story behind the current ones:
-
-| Name | Reasoning |
-|---|---|
-| KittaBot | "Kitta" is the actual Nepali term for a unit of shares, already used throughout this codebase's own field names (`appliedKitta`, `allottedKitta`). Immediately legible to the target audience, and clearly signals automation. |
-| MeroIPO | Echoes "MeroShare" itself ("mero" meaning "my" in Nepali), which most of the intended users will already recognize. |
-| IPOSathi | "Sathi" means friend or companion. Reads as a helpful assistant rather than a bot, if that framing is preferred. |
-
-Of these, KittaBot is the strongest fit: it is short, contains no ambiguity about what the project does, and reuses vocabulary the project already committed to internally rather than introducing a new metaphor.
+This project has gone by three names. It started as IPOBharuwa (Bharuwa, a porter, someone who carries a load for you), then for most of its life the code and UI text called it IPOBaje (Baje, a colloquial word for an elder, "the old man who takes care of things") while the GitHub repository itself stayed on the older name, so the two disagreed for a while. It is now IPOPilot everywhere: the repository, every package name, and the dashboard's own text. The new name leans on the same idea Getting started describes, you handle the one manual step, it flies the rest on autopilot, and it does not need a reader to already know any Nepali to make sense of it.
 
 ## Contributing
 

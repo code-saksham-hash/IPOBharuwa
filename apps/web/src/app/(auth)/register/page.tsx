@@ -31,7 +31,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-[360px]">
         <div className="text-center">
           <h1 className="text-base font-semibold text-[#FAFAFA]">Create Account</h1>
-          <p className="mt-1 text-[12px] text-[#A3A3A3]">Get started with IPOBaje</p>
+          <p className="mt-1 text-[12px] text-[#A3A3A3]">Get started with IPOPilot</p>
         </div>
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           <div>

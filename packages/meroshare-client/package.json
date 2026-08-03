@@ -1,5 +1,5 @@
 {
-  "name": "@ipobaje/meroshare-client",
+  "name": "@ipopilot/meroshare-client",
   "version": "0.0.0",
   "private": false,
   "description": "Unofficial TypeScript client for the MeroShare CDSC REST API",

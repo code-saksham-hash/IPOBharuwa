@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@ipobaje/ui', '@ipobaje/db', '@ipobaje/meroshare-client'],
+  transpilePackages: ['@ipopilot/ui', '@ipopilot/db', '@ipopilot/meroshare-client'],
 }
 
 export default nextConfig

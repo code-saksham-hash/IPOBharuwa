@@ -146,7 +146,7 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[13px] font-medium text-[#FAFAFA]">Delete my account</p>
-                <p className="text-[11px] text-[#707070]">Permanently delete your IPOBaje account and all data</p>
+                <p className="text-[11px] text-[#707070]">Permanently delete your IPOPilot account and all data</p>
               </div>
               {!showDeleteConfirm && (
                 <button

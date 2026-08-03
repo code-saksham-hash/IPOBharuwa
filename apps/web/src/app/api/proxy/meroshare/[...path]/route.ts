@@ -37,7 +37,7 @@ export async function POST(
 async function handleProxy(req: NextRequest, pathSegments: string[]) {
   const session = await getSession()
   if (!session?.user) {
-    console.log('[proxy] [N]  Session missing — user not logged into IPOBaje')
+    console.log('[proxy] [N]  Session missing — user not logged into IPOPilot')
     return NextResponse.json(
       { data: null, error: 'Not logged in — your session may have expired' },
       { status: 401 },

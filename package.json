@@ -1,5 +1,5 @@
 {
-  "name": "ipobaje",
+  "name": "ipopilot",
   "private": true,
   "license": "MIT",
   "packageManager": "pnpm@9.0.0",
@@ -9,10 +9,10 @@
     "lint": "turbo lint",
     "test": "turbo test",
     "format": "prettier --write .",
-    "db:migrate": "pnpm --filter @ipobaje/db db:migrate",
-    "db:seed": "pnpm --filter @ipobaje/db db:seed",
-    "worker:dev": "pnpm --filter @ipobaje/worker dev",
-    "worker:test-login": "pnpm --filter @ipobaje/meroshare-client test-login"
+    "db:migrate": "pnpm --filter @ipopilot/db db:migrate",
+    "db:seed": "pnpm --filter @ipopilot/db db:seed",
+    "worker:dev": "pnpm --filter @ipopilot/worker dev",
+    "worker:test-login": "pnpm --filter @ipopilot/meroshare-client test-login"
   },
   "devDependencies": {
     "turbo": "^2.0.0",

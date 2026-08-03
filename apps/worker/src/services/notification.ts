@@ -1,4 +1,4 @@
-import { prisma } from '@ipobaje/db'
+import { prisma } from '@ipopilot/db'
 
 type NotificationTypeValue =
   | 'NEW_IPO_OPEN'

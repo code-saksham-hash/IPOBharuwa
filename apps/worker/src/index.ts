@@ -9,7 +9,7 @@ import { autoApply } from './jobs/autoApply'
 import { startScheduler } from './scheduler'
 
 async function main() {
-  console.log('[worker] [start]  Starting IPOBaje worker...')
+  console.log('[worker] [start]  Starting IPOPilot worker...')
 
   const keyHex = process.env.ENCRYPTION_KEY
   if (!keyHex || keyHex.length !== 64) {

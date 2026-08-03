@@ -1,5 +1,5 @@
 async function main() {
-  console.log('[seed]  Seeding IPOBaje database...')
+  console.log('[seed]  Seeding IPOPilot database...')
 
   try {
     const response = await fetch(

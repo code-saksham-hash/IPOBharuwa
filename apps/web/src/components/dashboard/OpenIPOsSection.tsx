@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import type { IPOIssue } from '@ipobaje/meroshare-client'
+import type { IPOIssue } from '@ipopilot/meroshare-client'
 import { EmptyState } from '@/components/common/EmptyState'
 import { Calendar } from 'lucide-react'
 

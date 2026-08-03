@@ -1,4 +1,4 @@
-import { prisma } from '@ipobaje/db'
+import { prisma } from '@ipopilot/db'
 import { getAutoApplyQueue } from '@/lib/queue'
 
 interface IssueForNotification {

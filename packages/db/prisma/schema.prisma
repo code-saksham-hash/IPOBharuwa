@@ -1,4 +1,4 @@
-// IPOBaje — Prisma database schema
+// IPOPilot — Prisma database schema
 // PostgreSQL 16, Prisma 5.x
 
 generator client {

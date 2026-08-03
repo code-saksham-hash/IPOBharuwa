@@ -1,5 +1,5 @@
-import { prisma } from '@ipobaje/db'
-import { MeroShareClient } from '@ipobaje/meroshare-client'
+import { prisma } from '@ipopilot/db'
+import { MeroShareClient } from '@ipopilot/meroshare-client'
 import { decrypt } from '../crypto'
 import { createNotification } from '../services/notification'
 import { Queue } from 'bullmq'

@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth'
-import { prisma } from '@ipobaje/db'
+import { prisma } from '@ipopilot/db'
 import { authOptions } from './auth'
 
 export async function getSession() {

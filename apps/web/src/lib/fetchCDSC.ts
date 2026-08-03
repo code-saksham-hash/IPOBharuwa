@@ -1,5 +1,5 @@
 import { decrypt } from './crypto'
-import { MeroShareClient } from '@ipobaje/meroshare-client'
+import { MeroShareClient } from '@ipopilot/meroshare-client'
 
 export interface CDSCCredentials {
   dpId: number

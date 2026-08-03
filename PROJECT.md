@@ -1,4 +1,4 @@
-# IPOBaje — Project Reference
+# IPOPilot — Project Reference
 
 > Auto-generated: 2026-06-25. Update this file after every meaningful code change.
 > Path: `PROJECT.md` (project root)
@@ -7,7 +7,7 @@
 
 ## What is this?
 
-IPOBaje is an **open-source web dashboard** that automatically applies for IPOs on **MeroShare** (Nepal's CDSC stock platform) in the background. Users link their MeroShare accounts, and a background worker logs in, detects open IPO/FPO/RIGHT issues, and auto-submits applications. When allotment results come out, it checks and notifies the user.
+IPOPilot is an **open-source web dashboard** that automatically applies for IPOs on **MeroShare** (Nepal's CDSC stock platform) in the background. Users link their MeroShare accounts, and a background worker logs in, detects open IPO/FPO/RIGHT issues, and auto-submits applications. When allotment results come out, it checks and notifies the user.
 
 >  This project has no affiliation with CDSC, MeroShare, or NEPSE.
 
@@ -34,11 +34,11 @@ IPOBaje is an **open-source web dashboard** that automatically applies for IPOs 
 ┌──────────────────────┼──────────────────────────────┐
 │               packages                                │
 │  ┌─────────────────┐  ┌──────────────────┐           │
-│  │ @ipobaje/db     │  │ @ipobaje/        │           │
+│  │ @ipopilot/db     │  │ @ipopilot/        │           │
 │  │ (Prisma + PG)   │  │ meroshare-client │           │
 │  └─────────────────┘  │ (typed HTTP      │           │
 │  ┌─────────────────┐  │  client for CDSC)│           │
-│  │ @ipobaje/ui     │  └──────────────────┘           │
+│  │ @ipopilot/ui     │  └──────────────────┘           │
 │  │ (shared UI —    │                                  │
 │  │  WIP, no files  │                                  │
 │  │  yet)            │                                  │
@@ -84,11 +84,11 @@ IPOBaje is an **open-source web dashboard** that automatically applies for IPOs 
 | **Auth** | NextAuth.js v4 (Credentials provider, JWT sessions) |
 | **API** | Next.js API routes (REST-like JSON) |
 | **DB** | PostgreSQL 16 via Prisma 5.x |
-| **ORM** | Prisma Client (singleton in `@ipobaje/db`) |
+| **ORM** | Prisma Client (singleton in `@ipopilot/db`) |
 | **Queue** | BullMQ (Redis-backed) |
 | **Scheduler** | node-cron |
 | **Worker** | tsx (dev), tsup (build), Node.js |
-| **CDSC API** | Unofficial typed client (`@ipobaje/meroshare-client`) |
+| **CDSC API** | Unofficial typed client (`@ipopilot/meroshare-client`) |
 | **Encryption** | AES-256-GCM (Node `crypto` module) for MeroShare passwords |
 | **Monorepo** | pnpm workspaces + Turborepo |
 | **Infra** | Docker Compose (PostgreSQL + Redis) |
@@ -99,7 +99,7 @@ IPOBaje is an **open-source web dashboard** that automatically applies for IPOs 
 ## File Tree
 
 ```
-IPOBharuwa/
+IPOPilot/
 ├── apps/
 │   ├── web/                          # Next.js 14 dashboard + API
 │   │   ├── src/
@@ -217,7 +217,7 @@ IPOBharuwa/
 ### Models
 | Model | Key fields | Notes |
 |-------|-----------|-------|
-| **User** | id, email (unique), name, hashedPassword (bcrypt) | IPOBaje dashboard user |
+| **User** | id, email (unique), name, hashedPassword (bcrypt) | IPOPilot dashboard user |
 | **MeroShareAccount** | id, userId, boid, dpId, dpName, encryptedPassword (AES-256-GCM), encryptionIv, encryptionTag, bankId, bankName, accountNumber, accountBranchId, crnNumber, customerId, isActive | Linked CDSC account; `@@unique([userId, boid])` |
 | **IPOIssue** | id, companyShareId (unique, from CDSC), scrip, companyName, shareType, shareGroup, status, openDate, closeDate, issuePrice, minUnit, maxUnit, prospectusUrl | Upserted by `pollOpenIPOs` |
 | **IPOApplication** | id, accountId, issueId, appliedKitta, appliedAt, status, allottedKitta, resultCheckedAt, errorMessage, retryCount | `@@unique([accountId, issueId])` |
@@ -255,7 +255,7 @@ The browser **cannot call CDSC directly** due to CORS restrictions. All CDSC cal
 - **Auth token**: CDSC returns JWT in `Authorization` response header; proxy forwards it via `x-cdsc-token` custom header (since `Authorization` is CORS-protected)
 - **Rate limiting**: 30 requests per minute per IP
 
-### CDSC Endpoints Used (via `@ipobaje/meroshare-client`)
+### CDSC Endpoints Used (via `@ipopilot/meroshare-client`)
 | Endpoint | Method | Auth | Used By |
 |----------|--------|------|---------|
 | `/auth/` | POST | [N] | AddAccount modal, worker login |
@@ -340,7 +340,7 @@ pnpm dev                     # Start web + worker
 - [x] Accounts page (add, toggle, delete)
 - [x] AddAccount modal (2-step: profile → bank details)
 - [x] Settings page (display info, WIP password change/delete buttons)
-- [x] `@ipobaje/meroshare-client` package (all CDSC endpoints typed)
+- [x] `@ipopilot/meroshare-client` package (all CDSC endpoints typed)
 - [x] CDSC CORS proxy with WAF bypass headers + cookie forwarding
 - [x] AES-256-GCM encryption (identical in web + worker)
 - [x] Worker entry point (BullMQ worker + cron scheduler)
@@ -354,7 +354,7 @@ pnpm dev                     # Start web + worker
 ###  In Progress / Partially Done
 - [ ] Password change in Settings (UI exists, no API route wired)
 - [ ] Delete account / Remove all accounts (UI exists, no API route wired)
-- [ ] `@ipobaje/ui` shared package (package.json + tsconfig exist, **no source files**)
+- [ ] `@ipopilot/ui` shared package (package.json + tsconfig exist, **no source files**)
 - [ ] Bank API endpoint (`/bank/`) — AddAccount modal fetches it but CDSC may not have it
 - [ ] `customerId` field — fetched by worker but may not be populated for all accounts
 - [ ] Proper error handling for CDSC 403/429 edge cases (WAF blocking needs more testing)
@@ -391,4 +391,4 @@ pnpm dev                     # Start web + worker
 
 ---
 
-> **Instructions for Claude**: Read this file at the start of every session. Update it after making meaningful code changes (new features, bug fixes, refactors, schema changes, etc.). Add entries to the Update Log. If `@ipobaje/ui` gets source files, update the File Tree and Current State sections.
+> **Instructions for Claude**: Read this file at the start of every session. Update it after making meaningful code changes (new features, bug fixes, refactors, schema changes, etc.). Add entries to the Update Log. If `@ipopilot/ui` gets source files, update the File Tree and Current State sections.

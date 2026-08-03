@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@ipobaje/db'
+import { prisma } from '@ipopilot/db'
 import { requireSession } from '@/lib/session'
 
 export async function GET(

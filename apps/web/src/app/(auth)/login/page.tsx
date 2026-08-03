@@ -24,7 +24,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-[#0A0A0A] px-4">
       <div className="w-full max-w-[360px]">
         <div className="text-center">
-          <h1 className="text-base font-semibold text-[#FAFAFA]">IPOBaje</h1>
+          <h1 className="text-base font-semibold text-[#FAFAFA]">IPOPilot</h1>
           <p className="mt-1 text-[12px] text-[#A3A3A3]">Sign in to your account</p>
         </div>
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@ipobaje/db'
+import { prisma } from '@ipopilot/db'
 import { requireSession } from '@/lib/session'
 import { decrypt } from '@/lib/crypto'
 import { ensurePendingApplication } from '@/lib/ipoSync'
-import { MeroShareClient } from '@ipobaje/meroshare-client'
+import { MeroShareClient } from '@ipopilot/meroshare-client'
 
 // Logs into CDSC for one account and pulls current issues + pending applications
 // immediately, instead of waiting for the worker's next 4-hour poll. Called right

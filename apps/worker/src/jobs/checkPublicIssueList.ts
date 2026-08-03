@@ -1,4 +1,4 @@
-import { prisma } from '@ipobaje/db'
+import { prisma } from '@ipopilot/db'
 import * as cheerio from 'cheerio'
 import { createNotification } from '../services/notification'
 

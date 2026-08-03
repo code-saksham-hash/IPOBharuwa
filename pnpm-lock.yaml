@@ -26,13 +26,13 @@ importers:
 
   apps/web:
     dependencies:
-      '@ipobaje/db':
+      '@ipopilot/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@ipobaje/meroshare-client':
+      '@ipopilot/meroshare-client':
         specifier: workspace:*
         version: link:../../packages/meroshare-client
-      '@ipobaje/ui':
+      '@ipopilot/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@radix-ui/react-dialog':
@@ -114,10 +114,10 @@ importers:
 
   apps/worker:
     dependencies:
-      '@ipobaje/db':
+      '@ipopilot/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@ipobaje/meroshare-client':
+      '@ipopilot/meroshare-client':
         specifier: workspace:*
         version: link:../../packages/meroshare-client
       bullmq:
