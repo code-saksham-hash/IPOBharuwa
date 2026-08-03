@@ -22,14 +22,6 @@ export interface CDSCAccountError {
   message: string
 }
 
-export interface CDSCAccountResult {
-  boid: string
-  dpName: string
-  holdings: Record<string, unknown> | null
-  allotments: Array<Record<string, unknown>>
-  error?: CDSCAccountError
-}
-
 export async function loginToCDSC(credentials: CDSCCredentials): Promise<CDSCSession> {
   let password: string
   try {
@@ -80,21 +72,6 @@ function createAuthenticatedClient(session: CDSCSession): MeroShareClient {
   return client
 }
 
-export async function fetchPortfolioHoldings(
-  session: CDSCSession,
-): Promise<Record<string, unknown> | null> {
-  const client = createAuthenticatedClient(session)
-  try {
-    const data = await client.getPortfolio()
-    console.log('[fetchCDSC] /portfolio/ keys:', Object.keys(data).join(', '))
-    return data
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err)
-    console.warn(`[fetchCDSC] /portfolio/ failed: ${msg}`)
-    throw new Error(`CDSC /portfolio/: ${msg}`)
-  }
-}
-
 export async function fetchActiveApplications(
   session: CDSCSession,
 ): Promise<Array<Record<string, unknown>>> {
@@ -106,12 +83,19 @@ export async function fetchActiveApplications(
       page: 0,
       size: 200,
       searchRoleViewConstants: 'VIEW_APPLICANT_FORM_COMPLETE',
+      filterDateParams: [
+        { key: 'appliedDate', condition: '', alias: '', value: '' },
+        { key: 'appliedDate', condition: '', alias: '', value: '' },
+      ],
+      sortBy: 'appliedDate',
+      sortAsc: false,
     })
     console.log(`[fetchCDSC] Active applications: ${result.object?.length ?? 0} records (total: ${result.totalCount})`)
     return (result.object as Array<Record<string, unknown>>) ?? []
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
-    console.warn(`[fetchCDSC] /applicantForm/active/search/ failed: ${msg}`)
+    const body = (err as { responseBody?: string }).responseBody
+    console.warn(`[fetchCDSC] /applicantForm/active/search/ failed: ${msg}`, body ? `\n[fetchCDSC] response body: ${body}` : '')
     throw new Error(`CDSC /applicantForm/active/search/: ${msg}`)
   }
 }
@@ -127,12 +111,19 @@ export async function fetchMigratedApplications(
       page: 0,
       size: 200,
       searchRoleViewConstants: 'VIEW_APPLICANT_FORM_COMPLETE',
+      filterDateParams: [
+        { key: 'appliedDate', condition: '', alias: '', value: '' },
+        { key: 'appliedDate', condition: '', alias: '', value: '' },
+      ],
+      sortBy: 'appliedDate',
+      sortAsc: false,
     })
     console.log(`[fetchCDSC] Migrated applications: ${result.object?.length ?? 0} records (total: ${result.totalCount})`)
     return (result.object as Array<Record<string, unknown>>) ?? []
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
-    console.warn(`[fetchCDSC] /migrated/applicantForm/search/ failed: ${msg}`)
+    const body = (err as { responseBody?: string }).responseBody
+    console.warn(`[fetchCDSC] /migrated/applicantForm/search/ failed: ${msg}`, body ? `\n[fetchCDSC] response body: ${body}` : '')
     throw new Error(`CDSC /migrated/applicantForm/search/: ${msg}`)
   }
 }
@@ -177,91 +168,4 @@ export async function fetchAllApplications(
 
   console.log(`[fetchCDSC] Applications: ${merged.length} records, ${errors.length} endpoint error(s)`)
   return { records: merged, errors }
-}
-
-export async function fetchAccountCDSCData(
-  credentials: CDSCCredentials,
-  dpName: string,
-): Promise<CDSCAccountResult> {
-  const boid = credentials.boid
-
-  try {
-    const session = await withTimeout(loginToCDSC(credentials), 15_000)
-
-    const fetchErrors: string[] = []
-
-    const holdingsResult = await withTimeout(fetchPortfolioHoldings(session), 15_000).catch((err) => {
-      const msg = err instanceof Error ? err.message : String(err)
-      fetchErrors.push(`Portfolio holdings: ${msg}`)
-      return null
-    })
-
-    const appResult = await withTimeout(fetchAllApplications(session), 20_000).catch((err) => {
-      const msg = err instanceof Error ? err.message : String(err)
-      fetchErrors.push(`Application search: ${msg}`)
-      return { records: [] as Array<Record<string, unknown>>, errors: [msg] }
-    })
-
-    if (appResult.errors.length > 0) {
-      fetchErrors.push(...appResult.errors)
-    }
-
-    if (holdingsResult === null && appResult.records.length === 0 && fetchErrors.length > 0) {
-      return {
-        boid,
-        dpName,
-        holdings: null,
-        allotments: [],
-        error: {
-          boid,
-          dpName,
-          category: categorizeError(fetchErrors[0]!),
-          message: fetchErrors.join(' | '),
-        },
-      }
-    }
-
-    return {
-      boid,
-      dpName,
-      holdings: holdingsResult,
-      allotments: appResult.records,
-      error: fetchErrors.length > 0
-        ? { boid, dpName, category: 'UNEXPECTED_ERROR' as const, message: fetchErrors.join(' | ') }
-        : undefined,
-    }
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
-    const category = categorizeError(message)
-    return {
-      boid,
-      dpName,
-      holdings: null,
-      allotments: [],
-      error: { boid, dpName, category, message },
-    }
-  }
-}
-
-function categorizeError(message: string): CDSCAccountError['category'] {
-  const lower = message.toLowerCase()
-  if (lower.includes('decrypt') || lower.includes('invalid credential') || lower.includes('password')) {
-    return 'CREDENTIAL_ERROR'
-  }
-  if (lower.includes('blocked') || lower.includes('403') || lower.includes('429') || lower.includes('waf')) {
-    return 'WAF_ERROR'
-  }
-  if (lower.includes('timeout') || lower.includes('network') || lower.includes('unreachable')) {
-    return 'NETWORK_ERROR'
-  }
-  return 'UNEXPECTED_ERROR'
-}
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error(`Request timed out after ${ms / 1000}s`)), ms),
-    ),
-  ])
 }

@@ -18,24 +18,42 @@ export async function pollOpenIPOs(): Promise<void> {
   console.log('[pollOpenIPOs] [lookup]  Checking for open IPOs...')
 
   try {
-    const account = await prisma.meroShareAccount.findFirst({
+    const candidates = await prisma.meroShareAccount.findMany({
       where: { isActive: true },
     })
 
-    if (!account) {
+    if (candidates.length === 0) {
       console.log('[pollOpenIPOs] [warn]  No active accounts — skipping')
       return
     }
 
-    const password = decrypt({
-      cipher: account.encryptedPassword,
-      iv: account.encryptionIv,
-      tag: account.encryptionTag,
-    })
+    // A single account with a stale/wrong password shouldn't block issue
+    // discovery for everyone else — try each active account until one logs in.
+    let client: MeroShareClient | null = null
+    for (const candidate of candidates) {
+      try {
+        const password = decrypt({
+          cipher: candidate.encryptedPassword,
+          iv: candidate.encryptionIv,
+          tag: candidate.encryptionTag,
+        })
+        const attempt = new MeroShareClient()
+        await attempt.login(candidate.dpId, candidate.username || candidate.boid, password)
+        client = attempt
+        console.log(`[pollOpenIPOs] [Y]  Authenticated with account ${candidate.boid.slice(-6)}`)
+        break
+      } catch (err) {
+        console.warn(
+          `[pollOpenIPOs] [warn]  Login failed for account ${candidate.boid.slice(-6)}, trying next:`,
+          err instanceof Error ? err.message : err,
+        )
+      }
+    }
 
-    const client = new MeroShareClient()
-    await client.login(account.dpId, account.boid, password)
-    console.log(`[pollOpenIPOs] [Y]  Authenticated with account ${account.boid.slice(-6)}`)
+    if (!client) {
+      console.error('[pollOpenIPOs] [N]  All active accounts failed to authenticate — skipping this cycle')
+      return
+    }
 
     const issues = await client.getCurrentIssues()
     console.log(`[pollOpenIPOs] [info]  Found ${issues.length} current issue(s)`)

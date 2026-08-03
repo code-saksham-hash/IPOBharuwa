@@ -37,13 +37,19 @@ export async function checkResults(): Promise<void> {
         })
 
         const client = new MeroShareClient()
-        await client.login(app.account.dpId, app.account.boid, password)
+        await client.login(app.account.dpId, app.account.username || app.account.boid, password)
 
         const searchResult = await client.searchApplications({
           filterFieldParams: [],
           page: 0,
           size: 50,
           searchRoleViewConstants: 'VIEW_APPLICANT_FORM_COMPLETE',
+          filterDateParams: [
+            { key: 'appliedDate', condition: '', alias: '', value: '' },
+            { key: 'appliedDate', condition: '', alias: '', value: '' },
+          ],
+          sortBy: 'appliedDate',
+          sortAsc: false,
         })
 
         const objects = searchResult.object as Array<Record<string, unknown>>

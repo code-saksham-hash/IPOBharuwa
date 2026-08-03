@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@ipobaje/db'
 import { requireSession } from '@/lib/session'
+import { encrypt } from '@/lib/crypto'
 
 export async function PATCH(
   req: NextRequest,
@@ -17,6 +18,7 @@ export async function PATCH(
       accountBranchId,
       crnNumber,
       customerId,
+      transactionPin,
     } = body as {
       isActive?: boolean
       bankId?: number | null
@@ -25,6 +27,14 @@ export async function PATCH(
       accountBranchId?: number | null
       crnNumber?: string | null
       customerId?: number | null
+      transactionPin?: string
+    }
+
+    if (transactionPin !== undefined && !/^\d{4}$/.test(transactionPin)) {
+      return NextResponse.json(
+        { data: null, error: 'Transaction PIN must be 4 digits' },
+        { status: 400 },
+      )
     }
 
     const account = await prisma.meroShareAccount.findFirst({
@@ -43,6 +53,12 @@ export async function PATCH(
     if (accountBranchId !== undefined) data.accountBranchId = accountBranchId
     if (crnNumber !== undefined) data.crnNumber = crnNumber
     if (customerId !== undefined) data.customerId = customerId
+    if (transactionPin !== undefined) {
+      const encryptedPin = encrypt(transactionPin)
+      data.encryptedTransactionPin = encryptedPin.cipher
+      data.transactionPinIv = encryptedPin.iv
+      data.transactionPinTag = encryptedPin.tag
+    }
 
     if (Object.keys(data).length === 0) {
       return NextResponse.json(
@@ -67,10 +83,15 @@ export async function PATCH(
         customerId: true,
         isActive: true,
         updatedAt: true,
+        encryptedTransactionPin: true,
       },
     })
 
-    return NextResponse.json({ data: updated, error: null })
+    const { encryptedTransactionPin, ...updatedRest } = updated
+    return NextResponse.json({
+      data: { ...updatedRest, hasTransactionPin: encryptedTransactionPin !== null },
+      error: null,
+    })
   } catch (err) {
     if (err instanceof Error && err.message === 'UNAUTHORIZED') {
       return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })

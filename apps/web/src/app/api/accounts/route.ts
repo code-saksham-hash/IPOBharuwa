@@ -25,11 +25,17 @@ export async function GET() {
         lastLoginAt: true,
         lastAppliedAt: true,
         createdAt: true,
+        encryptedTransactionPin: true,
       },
       orderBy: { createdAt: 'desc' },
     })
 
-    return NextResponse.json({ data: accounts, error: null })
+    const withPinFlag = accounts.map(({ encryptedTransactionPin, ...rest }) => ({
+      ...rest,
+      hasTransactionPin: encryptedTransactionPin !== null,
+    }))
+
+    return NextResponse.json({ data: withPinFlag, error: null })
   } catch (err) {
     if (err instanceof Error && err.message === 'UNAUTHORIZED') {
       return NextResponse.json({ data: null, error: 'Unauthorized' }, { status: 401 })
@@ -47,7 +53,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
 
     const {
-      username, dpId, dpName, password,
+      username, dpId, dpName, password, transactionPin,
       boid: bodyBoid, fullName, clientCode, email, contact, address,
       bankId, bankName, accountNumber, accountBranchId, crnNumber, customerId,
     } = body as {
@@ -55,6 +61,7 @@ export async function POST(req: NextRequest) {
       dpId: number
       dpName: string
       password: string
+      transactionPin?: string
       boid?: string
       fullName?: string | null
       clientCode?: string | null
@@ -84,6 +91,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    if (!transactionPin || !/^\d{4}$/.test(transactionPin)) {
+      return NextResponse.json(
+        { data: null, error: 'Transaction PIN is required and must be 4 digits — without it, auto-apply cannot submit applications' },
+        { status: 400 },
+      )
+    }
+
     const boid = bodyBoid || username
     console.log(`[accounts] Saving — BOID: ${boid.slice(-6)}, name: ${fullName ?? 'N/A'}, bank: ${bankName ?? 'N/A'}`)
 
@@ -98,6 +112,7 @@ export async function POST(req: NextRequest) {
     }
 
     const encrypted = encrypt(password)
+    const encryptedPin = encrypt(transactionPin)
 
     const account = await prisma.meroShareAccount.create({
       data: {
@@ -110,6 +125,9 @@ export async function POST(req: NextRequest) {
         encryptedPassword: encrypted.cipher,
         encryptionIv: encrypted.iv,
         encryptionTag: encrypted.tag,
+        encryptedTransactionPin: encryptedPin.cipher,
+        transactionPinIv: encryptedPin.iv,
+        transactionPinTag: encryptedPin.tag,
         bankId: bankId ?? null,
         bankName: bankName ?? null,
         accountNumber: accountNumber ?? null,

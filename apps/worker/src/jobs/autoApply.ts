@@ -26,6 +26,12 @@ export async function autoApply(job: Job<AutoApplyJobData>): Promise<void> {
       throw new Error(`Account or issue not found: account=${accountId} issue=${issueId}`)
     }
 
+    if (!account.encryptedTransactionPin || !account.transactionPinIv || !account.transactionPinTag) {
+      throw new Error(
+        `No transaction PIN set for account ${account.boid.slice(-6)} — add one from the Accounts page before this account can auto-apply`,
+      )
+    }
+
     await prisma.iPOApplication.update({
       where: { id: applicationId },
       data: { status: 'APPLYING' },
@@ -37,8 +43,14 @@ export async function autoApply(job: Job<AutoApplyJobData>): Promise<void> {
       tag: account.encryptionTag,
     })
 
+    const transactionPin = decrypt({
+      cipher: account.encryptedTransactionPin,
+      iv: account.transactionPinIv,
+      tag: account.transactionPinTag,
+    })
+
     const client = new MeroShareClient()
-    await client.login(account.dpId, account.boid, password)
+    await client.login(account.dpId, account.username || account.boid, password)
     console.log(`[autoApply] [Y]  Logged in as ${account.boid.slice(-6)}`)
 
     let bankId = account.bankId
@@ -105,7 +117,7 @@ export async function autoApply(job: Job<AutoApplyJobData>): Promise<void> {
       crnNumber,
       customerId: customerId!,
       demat: account.boid,
-      transactionPIN: password,
+      transactionPIN: transactionPin,
     })
 
     await prisma.iPOApplication.update({

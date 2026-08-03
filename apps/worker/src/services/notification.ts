@@ -2,6 +2,7 @@ import { prisma } from '@ipobaje/db'
 
 type NotificationTypeValue =
   | 'NEW_IPO_OPEN'
+  | 'NEW_ISSUE_DETECTED'
   | 'AUTO_APPLY_SUCCESS'
   | 'AUTO_APPLY_FAILED'
   | 'RESULT_ALLOTTED'

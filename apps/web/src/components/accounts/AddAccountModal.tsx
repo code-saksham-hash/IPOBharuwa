@@ -88,6 +88,10 @@ export function AddAccountModal({ open, onClose, onAdded }: { open: boolean; onC
 
   const handleSave = async () => {
     if (!selectedDp || !username || !password) return
+    if (!/^\d{4}$/.test(transactionPin)) {
+      setSaveError('Transaction PIN must be 4 digits — required to auto-apply for IPOs')
+      return
+    }
     setStep('saving'); setSaveError(''); setSavedProfile(null)
 
     try {
@@ -153,6 +157,7 @@ export function AddAccountModal({ open, onClose, onAdded }: { open: boolean; onC
             dpId: selectedDp.id,
             dpName: selectedDp.name,
             password,
+            transactionPin,
             boid: (ownData.demat as string) ?? (ownData.boid as string) ?? username,
             fullName: (ownData.name as string) ?? null,
             clientCode: (ownData.clientCode as string) ?? null,
@@ -191,6 +196,14 @@ export function AddAccountModal({ open, onClose, onAdded }: { open: boolean; onC
 
       onAdded()
       setStep('bank-details')
+
+      // Best-effort — don't block the UI on this. The worker's cron will
+      // eventually catch up even if CDSC blocks this immediate sync.
+      fetch('/api/ipos/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accountId: acct.id }),
+      }).catch((err) => console.error('[AddAccount] IPO sync failed:', err))
     } catch (err) {
       console.error('[AddAccount] Unexpected error:', err)
       setSaveError(`Unexpected error: ${err instanceof Error ? err.message : 'Unknown'}`)
@@ -243,7 +256,7 @@ export function AddAccountModal({ open, onClose, onAdded }: { open: boolean; onC
   }
 
   if (!open) return null
-  const canSave = selectedDp && username.length > 0 && password.length > 0
+  const canSave = selectedDp && username.length > 0 && password.length > 0 && /^\d{4}$/.test(transactionPin)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -316,8 +329,13 @@ export function AddAccountModal({ open, onClose, onAdded }: { open: boolean; onC
 
             {/* Transaction PIN */}
             <div>
-              <label className="mb-1.5 block text-[12px] font-semibold text-[#A0A0A0]">Transaction PIN</label>
+              <label className="mb-1.5 block text-[12px] font-semibold text-[#A0A0A0]">
+                Transaction PIN <span className="text-red-400">*</span>
+              </label>
               <PasswordInput value={transactionPin} onChange={(v) => setTransactionPin(v.replace(/\D/g, '').slice(0, 4))} placeholder="4-digit PIN" maxLength={4} />
+              <p className="mt-1 text-[11px] text-[#707070]">
+                Required to submit applications — different from your password. Set on MeroShare under My Profile → Edit Transaction PIN.
+              </p>
             </div>
 
             {/* Error */}

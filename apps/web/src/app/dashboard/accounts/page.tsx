@@ -25,16 +25,29 @@ export default function AccountsPage() {
     mutate()
   }
 
+  const handleSetPin = async (id: string, pin: string) => {
+    const res = await fetch(`/api/accounts/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ transactionPin: pin }),
+    })
+    const json = await res.json().catch(() => null)
+    if (!json || json.error) {
+      throw new Error(json?.error ?? 'Failed to save PIN')
+    }
+    mutate()
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-[14px] font-medium text-[#FAFAFA]">Linked Accounts</h3>
-          <p className="text-[12px] text-[#707070]">{accounts.length} account(s) linked</p>
+          <h3 className="text-[14px] font-medium text-white">Linked Accounts</h3>
+          <p className="text-[12px] text-[#666666]">{accounts.length} account(s) linked</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-[#0F0F0F] px-4 py-2 text-[13px] font-medium text-[#E0E0E0] transition-colors hover:border-white/[0.15]"
+          className="inline-flex items-center gap-1.5 rounded border border-[#1A1A1A] bg-[#0D0D0D] px-4 py-2 text-[13px] text-white transition-colors hover:border-[#333333]"
         >
           <Plus size={15} strokeWidth={1.5} />
           Add Account
@@ -51,6 +64,7 @@ export default function AccountsPage() {
               account={account as Parameters<typeof AccountCard>[0]['account']}
               onToggle={handleToggle}
               onDelete={handleDelete}
+              onSetPin={handleSetPin}
             />
           ))}
         </div>

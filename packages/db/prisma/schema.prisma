@@ -32,6 +32,7 @@ enum ApplicationStatus {
 
 enum NotificationType {
   NEW_IPO_OPEN
+  NEW_ISSUE_DETECTED
   AUTO_APPLY_SUCCESS
   AUTO_APPLY_FAILED
   RESULT_ALLOTTED
@@ -65,6 +66,9 @@ model MeroShareAccount {
   encryptedPassword String          // AES-256-GCM ciphertext (hex)
   encryptionIv      String          // 12-byte IV (hex)
   encryptionTag     String          // 16-byte GCM auth tag (hex)
+  encryptedTransactionPin String?   // AES-256-GCM ciphertext (hex) — required to actually submit an application
+  transactionPinIv       String?
+  transactionPinTag      String?
   bankId            Int?
   bankName          String?
   accountNumber     String?
@@ -117,6 +121,23 @@ model IPOApplication {
   updatedAt       DateTime          @updatedAt
 
   @@unique([accountId, issueId])
+}
+
+// A row scraped from CDSC's public "Current Issue Update" page (cdsc.com.np/ipolist).
+// That page is publicly readable (unlike MeroShare's application backend, which
+// blocks automated access) but only carries subscription-progress fields — it's
+// missing companyShareId and per-applicant min/max unit, so a detected issue sits
+// here until a user completes those and it's promoted into a real IPOIssue.
+model DetectedIssue {
+  id             String    @id @default(cuid())
+  companyName    String    @unique
+  shareTypeRaw   String?
+  issueManager   String?
+  openDate       DateTime
+  closeDate      DateTime
+  estimatedPrice Decimal?  @db.Decimal(10, 2)
+  detectedAt     DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model Notification {

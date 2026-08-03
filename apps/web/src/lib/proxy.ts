@@ -56,7 +56,7 @@ export async function proxyToCDSC(
   response.headers.forEach((value, key) => {
     const lowerKey = key.toLowerCase()
     if (lowerKey === 'set-cookie') {
-      const nameValue = value.split(';')[0].trim()
+      const nameValue = (value.split(';')[0] ?? '').trim()
       if (nameValue) cookieParts.push(nameValue)
     } else {
       responseHeaders[lowerKey] = value

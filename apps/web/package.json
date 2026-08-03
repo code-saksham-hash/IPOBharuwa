@@ -26,6 +26,8 @@
     "@radix-ui/react-tooltip": "^1.0.7",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
     "@radix-ui/react-switch": "^1.0.3",
+    "bullmq": "^5.7.0",
+    "ioredis": "^5.3.0",
     "@ipobaje/meroshare-client": "workspace:*",
     "@ipobaje/db": "workspace:*",
     "@ipobaje/ui": "workspace:*"

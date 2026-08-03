@@ -123,3 +123,30 @@ async function handleProxy(req: NextRequest, pathSegments: string[]) {
     )
   }
 }
+
+function mapCDSCError(status: number, errorBody: string | null): string {
+  if (errorBody) {
+    try {
+      const parsed = JSON.parse(errorBody) as { message?: string; documentation?: string }
+      if (parsed.message) return parsed.message
+      if (parsed.documentation) return parsed.documentation
+    } catch {
+      // Not JSON — fall through to the status-based message below.
+    }
+  }
+
+  switch (status) {
+    case 401:
+      return 'Invalid MeroShare credentials'
+    case 403:
+      return 'CDSC blocked this request (403) — try again in a moment'
+    case 429:
+      return 'Too many requests to CDSC — try again in a minute'
+    case 500:
+    case 502:
+    case 503:
+      return 'MeroShare/CDSC is temporarily unavailable — try again in a moment'
+    default:
+      return errorBody?.slice(0, 300) || `CDSC request failed (HTTP ${status})`
+  }
+}
